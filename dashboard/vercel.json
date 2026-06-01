@@ -2,15 +2,5 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "nextjs",
-  "env": [
-    {
-      "key": "APIFY_API_TOKEN",
-      "description": "Apify API token for Instagram and YouTube scraping"
-    },
-    {
-      "key": "USE_APIFY",
-      "description": "Enable/disable live data fetching (true/false)"
-    }
-  ]
+  "framework": "nextjs"
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { instagramService } from "@/services/instagramService";
-import { youtubeService } from "@/services/youtubeService";
+import { youtubeApiService } from "@/services/youtubeApiService";
 import type { Category, Platform } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const result =
       platform === "instagram"
         ? await instagramService.fetchByIdentifier(identifier, channelId, category)
-        : await youtubeService.fetchByIdentifier(identifier, channelId, category);
+        : await youtubeApiService.fetchByIdentifier(identifier, channelId, category);
     return NextResponse.json(result);
   } catch (err) {
     console.error("[/api/channel]", err);
