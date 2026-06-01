@@ -73,18 +73,18 @@ function parseDuration(iso8601: string): number {
   return hours * 3600 + minutes * 60 + seconds;
 }
 
-/** Extract channel handle from identifier (e.g., "@Vaibhavsisinty-IG" => "Vaibhavsisinty-IG") */
+/** Ensure channel handle has @ prefix for forHandle lookup (e.g., "Vaibhavsisinty-IG" => "@Vaibhavsisinty-IG") */
 function normalizeHandle(identifier: string): string {
   let handle = identifier.trim();
-  if (handle.startsWith("@")) {
-    handle = handle.substring(1);
+  if (!handle.startsWith("@")) {
+    handle = "@" + handle;
   }
   return handle;
 }
 
 /**
- * Fetch channel ID from custom handle using forUsername parameter.
- * YouTube API: channels?part=id&forUsername=...
+ * Fetch channel ID from custom handle using forHandle parameter.
+ * YouTube API: channels?part=id&forHandle=...
  */
 async function resolveChannelIdFromHandle(
   handle: string,
@@ -93,13 +93,13 @@ async function resolveChannelIdFromHandle(
   try {
     const url = new URL(`${YT_API_BASE}/channels`);
     url.searchParams.set("part", "id");
-    url.searchParams.set("forUsername", handle);
+    url.searchParams.set("forHandle", handle);
     url.searchParams.set("key", apiKey);
 
     const response = await fetch(url.toString());
     if (!response.ok) {
       console.error(
-        `[YouTube API] forUsername lookup failed: ${response.status}`
+        `[YouTube API] forHandle lookup failed: ${response.status}`
       );
       return null;
     }
@@ -299,14 +299,17 @@ export const youtubeApiService = {
       return { audience: 0, posts: [] };
     }
 
-    // Normalize handle: remove @ prefix if present
+    // Normalize handle: ensure it has the @ prefix
     const handle = normalizeHandle(identifier);
 
     // Try to resolve channel ID from handle
     let resolvedChannelId: string | null = null;
 
-    // If identifier looks like a handle (contains alphanumerics, -, _)
-    if (/^[@\w\-]+$/.test(identifier)) {
+    // Check if the identifier is already a channel ID (starts with UC and is 24 chars)
+    const isChannelId = identifier.startsWith("UC") && identifier.length === 24;
+
+    // If identifier is a handle (contains alphanumerics, -, _, .)
+    if (!isChannelId && /^@?[\w\-\.]+$/.test(identifier)) {
       console.log(
         `[YouTube API] Resolving channel from handle: "${handle}"`
       );
