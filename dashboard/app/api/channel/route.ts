@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { instagramService } from "@/services/instagramService";
 import { youtubeApiService } from "@/services/youtubeApiService";
+import { youtubeService } from "@/services/youtubeService";
 import type { Category, Platform } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -37,10 +38,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result =
-      platform === "instagram"
-        ? await instagramService.fetchByIdentifier(identifier, channelId, category)
-        : await youtubeApiService.fetchByIdentifier(identifier, channelId, category);
+    let result;
+    if (platform === "instagram") {
+      result = await instagramService.fetchByIdentifier(identifier, channelId, category);
+    } else {
+      if (process.env.YOUTUBE_API_KEY) {
+        console.log(`[Channel API] Using official YouTube API for ${identifier}`);
+        result = await youtubeApiService.fetchByIdentifier(identifier, channelId, category);
+      } else {
+        console.log(`[Channel API] YOUTUBE_API_KEY is not set. Falling back to Apify YouTube scraper for ${identifier}`);
+        result = await youtubeService.fetchByIdentifier(identifier, channelId, category);
+      }
+    }
     return NextResponse.json(result);
   } catch (err) {
     console.error("[/api/channel]", err);

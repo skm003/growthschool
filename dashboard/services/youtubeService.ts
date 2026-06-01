@@ -34,7 +34,8 @@ export const youtubeService = {
 
     const items = await runActor<RawYtVideo>(YT_ACTOR, {
       startUrls: [{ url: videosUrl(identifier) }],
-      maxResults: 30,
+      maxVideos: 30,
+      maxShorts: 30,
     });
     
     // Debug: Log the raw response
