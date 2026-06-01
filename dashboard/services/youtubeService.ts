@@ -36,6 +36,17 @@ export const youtubeService = {
       startUrls: [{ url: videosUrl(identifier) }],
       maxResults: 30,
     });
+    
+    // Debug: Log the raw response
+    console.log(`[YouTube Apify] ${identifier}: Received ${items.length} items`);
+    if (items.length > 0) {
+      console.log(`  First item:`, JSON.stringify(items[0], null, 2));
+      const withSubs = items.filter(item => item.numberOfSubscribers || item.subscribers || item.subscriberCount);
+      if (withSubs.length > 0) {
+        console.log(`  Items with subscriber count: ${withSubs.length}`);
+      }
+    }
+    
     const { channel, posts } = mapYoutube(items, {
       channelId,
       contentType: category,

@@ -55,6 +55,8 @@ export interface RawYtVideo {
   thumbnailUrl?: string;
   channelName?: string;
   numberOfSubscribers?: number;
+  subscribers?: number; // Alternative field name
+  subscriberCount?: number; // Alternative field name
   channelAvatarUrl?: string;
   channelUrl?: string;
 }
@@ -128,14 +130,17 @@ export function mapYoutube(
 ): { channel: Channel; posts: YouTubePost[] } {
   // Drop error/empty items (e.g. { error: "NO_RESULTS" } for channels with no videos).
   const videos = items.filter((v) => !v.error && (v.id || v.title));
-  const first = videos[0] ?? items.find((v) => v.channelName) ?? {};
+  const first = videos[0] ?? items.find((v) => v.channelName) ?? items[0] ?? {};
+
+  // Try multiple field names for subscriber count
+  const subscribers = first.numberOfSubscribers ?? first.subscribers ?? first.subscriberCount ?? 0;
 
   const channel: Channel = {
     id: opts.channelId,
     platform: "youtube",
     name: first.channelName ?? opts.channelId,
     contentType: opts.contentType,
-    audience: first.numberOfSubscribers ?? 0,
+    audience: subscribers,
     avatarUrl: first.channelAvatarUrl,
     identifier: first.channelUrl,
   };
